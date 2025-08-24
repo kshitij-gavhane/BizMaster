@@ -1,6 +1,6 @@
 # Overview
 
-This is a comprehensive brick manufacturing ERP (Enterprise Resource Planning) system built with React, TypeScript, and Express. The application manages all aspects of a brick manufacturing operation including worker management, attendance tracking, production monitoring, sales orders, customer management, inventory control, and payment processing.
+This is a comprehensive ERP (Enterprise Resource Planning) system for HIM Bricks manufacturing business, built with React, TypeScript, and Express. The application manages all aspects of the brick manufacturing operation including worker management, attendance tracking, production monitoring, sales orders, customer management, inventory control, and payment processing.
 
 The system handles two types of workers: "rojdaar" (daily wage) and "karagir" (piece-rate), with sophisticated payroll calculations, attendance tracking, and production monitoring capabilities.
 

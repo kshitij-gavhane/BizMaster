@@ -30,7 +30,7 @@ class BrickERPApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => DashboardProvider(ApiService())),
       ],
       child: MaterialApp(
-        title: 'Brick ERP',
+        title: 'HIM Bricks',
         theme: ThemeData(
           primarySwatch: Colors.blue,
           visualDensity: VisualDensity.adaptivePlatformDensity,

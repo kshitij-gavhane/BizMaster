@@ -25,7 +25,7 @@ export default function Sidebar() {
   return (
     <div className="w-64 bg-white shadow-lg">
       <div className="p-6 border-b border-gray-200">
-        <h1 className="text-xl font-bold text-gray-800" data-testid="app-title">Brick ERP</h1>
+        <h1 className="text-xl font-bold text-gray-800" data-testid="app-title">HIM Bricks</h1>
         <p className="text-sm text-gray-500">Manufacturing Management</p>
       </div>
       
