@@ -6,9 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, Edit, DollarSign } from "lucide-react";
+import { Plus, Search, Edit, DollarSign, CreditCard } from "lucide-react";
 import WorkerForm from "@/components/forms/WorkerForm";
 import PaymentForm from "@/components/forms/PaymentForm";
+import { AdvancePaymentForm } from "@/components/forms/AdvancePaymentForm";
 import { queryClient } from "@/lib/queryClient";
 import type { Worker } from "@shared/schema";
 
@@ -18,6 +19,7 @@ export default function Workers() {
   const [selectedWorker, setSelectedWorker] = useState<Worker | null>(null);
   const [showWorkerForm, setShowWorkerForm] = useState(false);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
+  const [showAdvanceForm, setShowAdvanceForm] = useState(false);
 
   const { data: workers = [], isLoading } = useQuery({
     queryKey: ["/api/workers"],
@@ -79,6 +81,16 @@ export default function Workers() {
               />
             </DialogContent>
           </Dialog>
+
+          <Button
+            variant="outline"
+            className="text-green-600 border-green-200 hover:bg-green-50"
+            onClick={() => setShowAdvanceForm(true)}
+            data-testid="button-advance-payment"
+          >
+            <CreditCard className="mr-2 h-4 w-4" />
+            Give Advance
+          </Button>
           
           <Select value={filterType} onValueChange={setFilterType} data-testid="select-worker-type">
             <SelectTrigger className="w-48">
@@ -197,6 +209,19 @@ export default function Workers() {
                           <DollarSign className="h-4 w-4 mr-1" />
                           Pay
                         </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-blue-600 hover:text-blue-700"
+                          onClick={() => {
+                            setSelectedWorker(worker);
+                            setShowAdvanceForm(true);
+                          }}
+                          data-testid={`button-advance-${worker.id}`}
+                        >
+                          <CreditCard className="h-4 w-4 mr-1" />
+                          Advance
+                        </Button>
                       </td>
                     </tr>
                   ))
@@ -255,6 +280,17 @@ export default function Workers() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Advance Payment Dialog */}
+      <AdvancePaymentForm
+        workers={workers}
+        selectedWorkerId={selectedWorker?.id}
+        open={showAdvanceForm}
+        onOpenChange={(open) => {
+          setShowAdvanceForm(open);
+          if (!open) setSelectedWorker(null);
+        }}
+      />
     </div>
   );
 }

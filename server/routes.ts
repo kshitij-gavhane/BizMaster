@@ -7,7 +7,8 @@ import {
   insertCustomerSchema, 
   insertSalesOrderSchema,
   insertInventoryMovementSchema,
-  insertPaymentSchema
+  insertPaymentSchema,
+  insertAdvancePaymentSchema
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -267,6 +268,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(calculations);
     } catch (error) {
       res.status(400).json({ message: "Failed to calculate weekly payments", error });
+    }
+  });
+
+  // Advance Payments
+  app.get("/api/advance-payments", async (req, res) => {
+    const workerId = req.query.workerId as string;
+    const advances = await storage.getAdvancePayments(workerId);
+    res.json(advances);
+  });
+
+  app.post("/api/advance-payments", async (req, res) => {
+    try {
+      const advanceData = insertAdvancePaymentSchema.parse(req.body);
+      const advance = await storage.createAdvancePayment(advanceData);
+      res.json(advance);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid advance payment data", error });
     }
   });
 

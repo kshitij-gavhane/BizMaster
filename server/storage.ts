@@ -6,7 +6,8 @@ import {
   type Inventory,
   type InventoryMovement, type InsertInventoryMovement,
   type Payment, type InsertPayment,
-  type WeeklySummary, type InsertWeeklySummary
+  type WeeklySummary, type InsertWeeklySummary,
+  type AdvancePayment, type InsertAdvancePayment
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 
@@ -49,6 +50,10 @@ export interface IStorage {
   createWeeklySummary(summary: InsertWeeklySummary): Promise<WeeklySummary>;
   updateWeeklySummary(id: string, updates: Partial<WeeklySummary>): Promise<WeeklySummary>;
 
+  // Advance Payments
+  getAdvancePayments(workerId?: string): Promise<AdvancePayment[]>;
+  createAdvancePayment(advance: InsertAdvancePayment): Promise<AdvancePayment>;
+
   // Dashboard metrics
   getDashboardMetrics(): Promise<{
     totalWorkers: number;
@@ -69,6 +74,7 @@ export class MemStorage implements IStorage {
   private inventoryMovements: Map<string, InventoryMovement> = new Map();
   private payments: Map<string, Payment> = new Map();
   private weeklySummaries: Map<string, WeeklySummary> = new Map();
+  private advancePayments: Map<string, AdvancePayment> = new Map();
 
   constructor() {
     // Initialize with starting inventory
@@ -95,7 +101,11 @@ export class MemStorage implements IStorage {
       ...insertWorker, 
       id, 
       balance: "0",
-      isActive: true 
+      isActive: true,
+      dailyWage: insertWorker.dailyWage ?? null,
+      pieceRate: insertWorker.pieceRate ?? null,
+      phone: insertWorker.phone ?? null,
+      address: insertWorker.address ?? null,
     };
     this.workers.set(id, worker);
     return worker;
@@ -133,7 +143,9 @@ export class MemStorage implements IStorage {
     const attendance: Attendance = { 
       ...insertAttendance, 
       id,
-      createdAt: new Date()
+      createdAt: new Date(),
+      bricksProduced: insertAttendance.bricksProduced ?? null,
+      notes: insertAttendance.notes ?? null,
     };
     this.attendance.set(id, attendance);
     return attendance;
@@ -163,7 +175,9 @@ export class MemStorage implements IStorage {
       id,
       totalOrders: 0,
       lastOrderDate: null,
-      createdAt: new Date()
+      createdAt: new Date(),
+      phone: insertCustomer.phone ?? null,
+      address: insertCustomer.address ?? null,
     };
     this.customers.set(id, customer);
     return customer;
@@ -199,7 +213,8 @@ export class MemStorage implements IStorage {
       totalAmount,
       status: "pending",
       deliveryDate: null,
-      createdAt: new Date()
+      createdAt: new Date(),
+      notes: insertOrder.notes ?? null,
     };
     this.salesOrders.set(id, order);
 
@@ -207,7 +222,7 @@ export class MemStorage implements IStorage {
     const customer = this.customers.get(insertOrder.customerId);
     if (customer) {
       await this.updateCustomer(insertOrder.customerId, {
-        totalOrders: customer.totalOrders + 1,
+        totalOrders: (customer.totalOrders ?? 0) + 1,
         lastOrderDate: insertOrder.orderDate
       });
     }
@@ -251,7 +266,7 @@ export class MemStorage implements IStorage {
   async getInventoryMovements(limit = 50): Promise<InventoryMovement[]> {
     const movements = Array.from(this.inventoryMovements.values());
     return movements
-      .sort((a, b) => new Date(b.movementDate).getTime() - new Date(a.movementDate).getTime())
+      .sort((a, b) => (b.movementDate ? new Date(b.movementDate) : new Date()).getTime() - (a.movementDate ? new Date(a.movementDate) : new Date()).getTime())
       .slice(0, limit);
   }
 
@@ -260,7 +275,9 @@ export class MemStorage implements IStorage {
     const movement: InventoryMovement = { 
       ...insertMovement, 
       id,
-      movementDate: new Date()
+      movementDate: new Date(),
+      reason: insertMovement.reason ?? null,
+      referenceId: insertMovement.referenceId ?? null,
     };
     this.inventoryMovements.set(id, movement);
     return movement;
@@ -280,15 +297,19 @@ export class MemStorage implements IStorage {
     const payment: Payment = { 
       ...insertPayment, 
       id,
-      paymentDate: new Date()
+      paymentDate: new Date(),
+      daysWorked: insertPayment.daysWorked ?? null,
+      bricksProduced: insertPayment.bricksProduced ?? null,
+      notes: insertPayment.notes ?? null,
     };
     this.payments.set(id, payment);
 
-    // Update worker balance
+    // Update worker balance - add remaining balance (debt), subtract if overpaid
     const worker = this.workers.get(insertPayment.workerId);
     if (worker) {
       const currentBalance = Number(worker.balance);
-      const newBalance = currentBalance + Number(insertPayment.balanceAmount);
+      const balanceAmount = Number(insertPayment.balanceAmount);
+      const newBalance = currentBalance + balanceAmount;
       await this.updateWorker(insertPayment.workerId, { balance: newBalance.toString() });
     }
 
@@ -303,7 +324,14 @@ export class MemStorage implements IStorage {
 
   async createWeeklySummary(insertSummary: InsertWeeklySummary): Promise<WeeklySummary> {
     const id = randomUUID();
-    const summary: WeeklySummary = { ...insertSummary, id };
+    const summary: WeeklySummary = { 
+      ...insertSummary, 
+      id,
+      daysWorked: insertSummary.daysWorked ?? null,
+      bricksProduced: insertSummary.bricksProduced ?? null,
+      grossEarnings: insertSummary.grossEarnings ?? null,
+      isCalculated: insertSummary.isCalculated ?? null,
+    };
     this.weeklySummaries.set(id, summary);
     return summary;
   }
@@ -316,6 +344,38 @@ export class MemStorage implements IStorage {
     return updated;
   }
 
+  // Advance Payments
+  async getAdvancePayments(workerId?: string): Promise<AdvancePayment[]> {
+    const allAdvances = Array.from(this.advancePayments.values());
+    if (workerId) {
+      return allAdvances.filter(a => a.workerId === workerId);
+    }
+    return allAdvances;
+  }
+
+  async createAdvancePayment(insertAdvance: InsertAdvancePayment): Promise<AdvancePayment> {
+    const id = randomUUID();
+    const advance: AdvancePayment = { 
+      ...insertAdvance, 
+      id,
+      paymentDate: new Date(),
+      reason: insertAdvance.reason ?? null,
+      notes: insertAdvance.notes ?? null,
+    };
+    this.advancePayments.set(id, advance);
+
+    // Update worker balance - advance reduces their balance (negative = they owe money back)
+    const worker = this.workers.get(insertAdvance.workerId);
+    if (worker) {
+      const currentBalance = Number(worker.balance);
+      const advanceAmount = Number(insertAdvance.amount);
+      const newBalance = currentBalance - advanceAmount;
+      await this.updateWorker(insertAdvance.workerId, { balance: newBalance.toString() });
+    }
+
+    return advance;
+  }
+
   // Dashboard metrics
   async getDashboardMetrics() {
     const workers = await this.getWorkers();
@@ -324,7 +384,7 @@ export class MemStorage implements IStorage {
     
     const weekStart = new Date();
     weekStart.setDate(weekStart.getDate() - weekStart.getDay() + 1); // Monday
-    const weekEnd = new Date();
+    const weekEnd = new Date(weekStart);
     weekEnd.setDate(weekStart.getDate() + 6); // Sunday
     
     const weeklyAttendance = Array.from(this.attendance.values()).filter(
@@ -336,7 +396,7 @@ export class MemStorage implements IStorage {
     const weeklyProduction = weeklyAttendance.reduce((sum, a) => sum + (a.bricksProduced || 0), 0);
     
     const recentOrders = Array.from(this.salesOrders.values())
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .sort((a, b) => (b.createdAt ? new Date(b.createdAt) : new Date()).getTime() - (a.createdAt ? new Date(a.createdAt) : new Date()).getTime())
       .slice(0, 5);
 
     return {

@@ -95,6 +95,15 @@ export const weeklySummary = pgTable("weekly_summary", {
   isCalculated: boolean("is_calculated").default(false),
 });
 
+export const advancePayments = pgTable("advance_payments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  workerId: varchar("worker_id").notNull().references(() => workers.id),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  reason: text("reason"),
+  paymentDate: timestamp("payment_date").default(sql`now()`),
+  notes: text("notes"),
+});
+
 // Insert schemas
 export const insertWorkerSchema = createInsertSchema(workers).omit({
   id: true,
@@ -134,6 +143,11 @@ export const insertWeeklySummarySchema = createInsertSchema(weeklySummary).omit(
   id: true,
 });
 
+export const insertAdvancePaymentSchema = createInsertSchema(advancePayments).omit({
+  id: true,
+  paymentDate: true,
+});
+
 // Types
 export type Worker = typeof workers.$inferSelect;
 export type InsertWorker = z.infer<typeof insertWorkerSchema>;
@@ -157,3 +171,6 @@ export type InsertPayment = z.infer<typeof insertPaymentSchema>;
 
 export type WeeklySummary = typeof weeklySummary.$inferSelect;
 export type InsertWeeklySummary = z.infer<typeof insertWeeklySummarySchema>;
+
+export type AdvancePayment = typeof advancePayments.$inferSelect;
+export type InsertAdvancePayment = z.infer<typeof insertAdvancePaymentSchema>;

@@ -189,4 +189,28 @@ class ApiService {
     }
     throw Exception('Failed to load dashboard metrics');
   }
+
+  Future<List<dynamic>> getAdvancePayments([String? workerId]) async {
+    String url = '$baseUrl/advance-payments';
+    if (workerId != null) {
+      url += '?workerId=$workerId';
+    }
+    final response = await http.get(Uri.parse(url));
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    }
+    throw Exception('Failed to load advance payments');
+  }
+
+  Future<Map<String, dynamic>> createAdvancePayment(Map<String, dynamic> advance) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/advance-payments'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode(advance),
+    );
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    }
+    throw Exception('Failed to create advance payment');
+  }
 }

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/workers_provider.dart';
 import '../models/worker.dart';
 import '../widgets/worker_form.dart';
+import '../widgets/advance_payment_form.dart';
 
 class WorkersScreen extends StatefulWidget {
   const WorkersScreen({super.key});
@@ -133,6 +134,10 @@ class _WorkersScreenState extends State<WorkersScreen> {
                                     child: Text('Edit'),
                                   ),
                                   const PopupMenuItem(
+                                    value: 'advance',
+                                    child: Text('Give Advance'),
+                                  ),
+                                  const PopupMenuItem(
                                     value: 'delete',
                                     child: Text('Delete'),
                                   ),
@@ -140,6 +145,8 @@ class _WorkersScreenState extends State<WorkersScreen> {
                                 onSelected: (value) {
                                   if (value == 'edit') {
                                     _showWorkerForm(context, worker);
+                                  } else if (value == 'advance') {
+                                    _showAdvanceForm(context, worker.id);
                                   } else if (value == 'delete') {
                                     _confirmDelete(context, provider, worker);
                                   }
@@ -170,6 +177,19 @@ class _WorkersScreenState extends State<WorkersScreen> {
           bottom: MediaQuery.of(context).viewInsets.bottom,
         ),
         child: WorkerForm(worker: worker),
+      ),
+    );
+  }
+
+  void _showAdvanceForm(BuildContext context, String workerId) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: AdvancePaymentForm(selectedWorkerId: workerId),
       ),
     );
   }
