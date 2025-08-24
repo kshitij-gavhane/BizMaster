@@ -151,6 +151,28 @@ export class MemStorage implements IStorage {
     return attendance;
   }
 
+  async upsertAttendance(insertAttendance: InsertAttendance): Promise<Attendance> {
+    // Check if attendance record already exists for this worker and date
+    const existing = Array.from(this.attendance.values()).find(
+      a => a.workerId === insertAttendance.workerId && a.date === insertAttendance.date
+    );
+
+    if (existing) {
+      // Update existing record
+      const updated: Attendance = {
+        ...existing,
+        isPresent: insertAttendance.isPresent,
+        bricksProduced: insertAttendance.bricksProduced ?? null,
+        notes: insertAttendance.notes ?? null,
+      };
+      this.attendance.set(existing.id, updated);
+      return updated;
+    } else {
+      // Create new record
+      return this.createAttendance(insertAttendance);
+    }
+  }
+
   async updateAttendance(id: string, updates: Partial<Attendance>): Promise<Attendance> {
     const attendance = this.attendance.get(id);
     if (!attendance) throw new Error("Attendance record not found");

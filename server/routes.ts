@@ -75,7 +75,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/attendance", async (req, res) => {
     try {
       const attendanceData = insertAttendanceSchema.parse(req.body);
-      const attendance = await storage.createAttendance(attendanceData);
+      const attendance = await storage.upsertAttendance(attendanceData);
       res.json(attendance);
     } catch (error) {
       res.status(400).json({ message: "Invalid attendance data", error });
