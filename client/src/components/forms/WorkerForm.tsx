@@ -143,6 +143,7 @@ export default function WorkerForm({ worker, onSuccess, onCancel }: WorkerFormPr
                   <SelectContent>
                     <SelectItem value="rojdaar">Rojdaar (Daily Wage)</SelectItem>
                     <SelectItem value="karagir">Karagir (Piece Rate)</SelectItem>
+                    <SelectItem value="driver">Driver (Trip Based)</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />

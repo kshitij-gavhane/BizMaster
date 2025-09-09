@@ -8,6 +8,7 @@ import {
   ArrowUp,
   AlertTriangle 
 } from "lucide-react";
+import NotesWidget from "@/components/ui/notes-widget";
 
 export default function Dashboard() {
   const { data: metrics, isLoading } = useQuery({
@@ -126,9 +127,9 @@ export default function Dashboard() {
       </div>
 
       {/* Charts and Recent Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Production Chart Placeholder */}
-        <Card className="bg-white" data-testid="card-production-chart">
+        <Card className="bg-white lg:col-span-2" data-testid="card-production-chart">
           <CardContent className="p-6">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">Weekly Production Trend</h3>
             <div className="h-64 bg-gray-100 rounded-lg flex items-center justify-center">
@@ -136,6 +137,9 @@ export default function Dashboard() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Quick Notes */}
+        <NotesWidget />
 
         {/* Recent Orders */}
         <Card className="bg-white" data-testid="card-recent-orders">
@@ -156,6 +160,11 @@ export default function Dashboard() {
                       <p className="text-sm text-gray-500" data-testid={`text-order-number-${index}`}>
                         {order.orderNumber}
                       </p>
+                      {order.notes && (
+                        <p className="text-xs text-gray-500 mt-1" data-testid={`text-order-notes-${index}`}>
+                          Notes: {order.notes}
+                        </p>
+                      )}
                     </div>
                     <div className="text-right">
                       <p className="font-medium text-gray-900" data-testid={`text-quantity-${index}`}>

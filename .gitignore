@@ -1,6 +1,72 @@
-node_modules
-dist
+# Node / Web
+node_modules/
+.npm/
+.pnpm-store/
+dist/
+build/
+.next/
+.vite/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnp.*
+coverage/
 .DS_Store
-server/public
-vite.config.ts.*
-*.tar.gz
+
+# Vite/React
+client/.vite/
+client/node_modules/
+client/dist/
+
+# Flutter/Dart
+.dart_tool/
+.packages
+.pub-cache/
+.flutter-plugins
+.flutter-plugins-dependencies
+.melos_tool/
+/build/
+**/build/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+
+# iOS/macOS
+ios/Pods/
+ios/Flutter/ephemeral/
+macos/Pods/
+macos/Flutter/ephemeral/
+DerivedData/
+
+# Xcode
+*.xcuserstate
+*.xcworkspace/xcuserdata/
+*.xcuserdatad/
+
+# VSCode/IDE/editor
+.vscode/
+.idea/
+*.iml
+
+# Env/secrets
+.env
+.env.*
+*.pem
+*.key
+*.crt
+
+# Lock files (optional)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+# pubspec.lock
+
+# Misc
+.local/
+.sass-cache/
+.tmp/
+
+# Generated assets
+web/*.png
+web/*.ico
+

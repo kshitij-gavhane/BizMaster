@@ -1,0 +1,650 @@
+{
+  "info": {
+    "name": "BizMaster ERP API Collection",
+    "description": "Complete API collection for BizMaster ERP system including Workers, Attendance, Customers, Sales Orders, Inventory, Payments, and Dashboard endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+              "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "workerId",
+      "value": "{{$randomUUID}}",
+      "type": "string"
+    },
+    {
+      "key": "customerId",
+      "value": "{{$randomUUID}}",
+      "type": "string"
+    },
+    {
+      "key": "salesOrderId",
+      "value": "{{$randomUUID}}",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Workers",
+      "item": [
+        {
+          "name": "Get All Workers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/workers",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "workers"]
+            },
+            "description": "Retrieve all workers from the system"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Worker by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/workers/{{workerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "workers", "{{workerId}}"]
+            },
+            "description": "Retrieve a specific worker by their ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Worker",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"type\": \"rojdaar\",\n  \"dailyWage\": \"500.00\",\n  \"phone\": \"+91-9876543210\",\n  \"address\": \"123 Main Street, City\",\n  \"joinDate\": \"2024-01-01\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/workers",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "workers"]
+            },
+            "description": "Create a new worker in the system"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Worker",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe Updated\",\n  \"dailyWage\": \"550.00\",\n  \"phone\": \"+91-9876543210\",\n  \"address\": \"456 Updated Street, City\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/workers/{{workerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "workers", "{{workerId}}"]
+            },
+            "description": "Update an existing worker's information"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Worker",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/workers/{{workerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "workers", "{{workerId}}"]
+            },
+            "description": "Delete a worker from the system"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Attendance",
+      "item": [
+        {
+          "name": "Get Attendance by Date",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/attendance?date=2024-01-15",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "attendance"],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "2024-01-15"
+                }
+              ]
+            },
+            "description": "Get attendance records for a specific date"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Worker Attendance by Week",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/attendance/worker/{{workerId}}?weekStart=2024-01-15&weekEnd=2024-01-21",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "attendance", "worker", "{{workerId}}"],
+              "query": [
+                {
+                  "key": "weekStart",
+                  "value": "2024-01-15"
+                },
+                {
+                  "key": "weekEnd",
+                  "value": "2024-01-21"
+                }
+              ]
+            },
+            "description": "Get attendance records for a specific worker within a date range"
+          },
+          "response": []
+        },
+        {
+          "name": "Create/Update Attendance",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"workerId\": \"{{workerId}}\",\n  \"date\": \"2024-01-15\",\n  \"isPresent\": true,\n  \"bricksProduced\": 1000,\n  \"notes\": \"Good performance today\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/attendance",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "attendance"]
+            },
+            "description": "Create or update attendance record for a worker"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Attendance",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isPresent\": true,\n  \"bricksProduced\": 1200,\n  \"notes\": \"Updated notes\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/attendance/{{$randomUUID}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "attendance", "{{$randomUUID}}"]
+            },
+            "description": "Update an existing attendance record"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Customers",
+      "item": [
+        {
+          "name": "Get All Customers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/customers",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "customers"]
+            },
+            "description": "Retrieve all customers from the system"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Customer by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/customers/{{customerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "customers", "{{customerId}}"]
+            },
+            "description": "Retrieve a specific customer by their ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Customer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"ABC Construction\",\n  \"phone\": \"+91-9876543210\",\n  \"address\": \"456 Business Park, City\",\n  \"ratePerBrick\": \"8.50\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/customers",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "customers"]
+            },
+            "description": "Create a new customer in the system"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Customer",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"ABC Construction Ltd\",\n  \"phone\": \"+91-9876543210\",\n  \"address\": \"789 Updated Business Park, City\",\n  \"ratePerBrick\": \"9.00\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/customers/{{customerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "customers", "{{customerId}}"]
+            },
+            "description": "Update an existing customer's information"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Sales Orders",
+      "item": [
+        {
+          "name": "Get All Sales Orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/sales-orders",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "sales-orders"]
+            },
+            "description": "Retrieve all sales orders from the system"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Sales Order by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/sales-orders/{{salesOrderId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "sales-orders", "{{salesOrderId}}"]
+            },
+            "description": "Retrieve a specific sales order by its ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Sales Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"{{customerId}}\",\n  \"quantity\": 5000,\n  \"ratePerBrick\": \"8.50\",\n  \"vehicleType\": \"truck\",\n  \"vehicleNumber\": \"MH-12-AB-1234\",\n  \"driverName\": \"Rajesh Kumar\",\n  \"orderDate\": \"2024-01-15\",\n  \"deliveryDate\": \"2024-01-20\",\n  \"notes\": \"Urgent delivery required\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/sales-orders",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "sales-orders"]
+            },
+            "description": "Create a new sales order in the system"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Sales Order",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"delivered\",\n  \"deliveryDate\": \"2024-01-20\",\n  \"notes\": \"Order delivered successfully\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/sales-orders/{{salesOrderId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "sales-orders", "{{salesOrderId}}"]
+            },
+            "description": "Update an existing sales order"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Inventory",
+      "item": [
+        {
+          "name": "Get Current Inventory",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/inventory",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "inventory"]
+            },
+            "description": "Get current inventory status"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Inventory",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentStock\": 25000,\n  \"khangerStock\": 500\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/inventory",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "inventory"]
+            },
+            "description": "Update current inventory levels"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Inventory Movements",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/inventory/movements?limit=100",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "inventory", "movements"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "100"
+                }
+              ]
+            },
+            "description": "Get inventory movement history"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Inventory Movement",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"production\",\n  \"quantity\": 5000,\n  \"reason\": \"Daily production\",\n  \"referenceId\": \"{{$randomUUID}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/inventory/movements",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "inventory", "movements"]
+            },
+            "description": "Record an inventory movement (production, sale, adjustment, damage)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        {
+          "name": "Get Payments by Worker",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments?workerId={{workerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments"],
+              "query": [
+                {
+                  "key": "workerId",
+                  "value": "{{workerId}}"
+                }
+              ]
+            },
+            "description": "Get payment history for a specific worker"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"workerId\": \"{{workerId}}\",\n  \"weekStartDate\": \"2024-01-15\",\n  \"weekEndDate\": \"2024-01-21\",\n  \"daysWorked\": 6,\n  \"bricksProduced\": 6000,\n  \"grossAmount\": \"3000.00\",\n  \"paidAmount\": \"2500.00\",\n  \"balanceAmount\": \"500.00\",\n  \"notes\": \"Weekly payment for week ending 21st Jan\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/payments",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments"]
+            },
+            "description": "Create a new payment record for a worker"
+          },
+          "response": []
+        },
+        {
+          "name": "Calculate Weekly Payments",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"weekStart\": \"2024-01-15\",\n  \"weekEnd\": \"2024-01-21\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/calculate-weekly",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "calculate-weekly"]
+            },
+            "description": "Calculate weekly payments for all workers based on attendance and production"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Advance Payments",
+      "item": [
+        {
+          "name": "Get Advance Payments by Worker",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/advance-payments?workerId={{workerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "advance-payments"],
+              "query": [
+                {
+                  "key": "workerId",
+                  "value": "{{workerId}}"
+                }
+              ]
+            },
+            "description": "Get advance payment history for a specific worker"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Advance Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"workerId\": \"{{workerId}}\",\n  \"amount\": \"1000.00\",\n  \"reason\": \"Medical emergency\",\n  \"notes\": \"Advance payment for medical expenses\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/advance-payments",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "advance-payments"]
+            },
+            "description": "Create a new advance payment for a worker"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Weekly Summary",
+      "item": [
+        {
+          "name": "Get Weekly Summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/weekly-summary/{{workerId}}/2024-01-15",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "weekly-summary", "{{workerId}}", "2024-01-15"]
+            },
+            "description": "Get weekly summary for a specific worker and week"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Weekly Summary",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"workerId\": \"{{workerId}}\",\n  \"weekStartDate\": \"2024-01-15\",\n  \"weekEndDate\": \"2024-01-21\",\n  \"daysWorked\": 6,\n  \"bricksProduced\": 6000,\n  \"grossEarnings\": \"3000.00\",\n  \"isCalculated\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/weekly-summary",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "weekly-summary"]
+            },
+            "description": "Create a new weekly summary record"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "Get Dashboard Metrics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/metrics",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "metrics"]
+            },
+            "description": "Get dashboard metrics and KPIs"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
+
+
+
+
+
+
+
+

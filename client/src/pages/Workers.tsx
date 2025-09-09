@@ -10,6 +10,7 @@ import { Plus, Search, Edit, DollarSign, CreditCard } from "lucide-react";
 import WorkerForm from "@/components/forms/WorkerForm";
 import PaymentForm from "@/components/forms/PaymentForm";
 import { AdvancePaymentForm } from "@/components/forms/AdvancePaymentForm";
+import WorkerDetails from "@/components/forms/WorkerDetails";
 import { queryClient } from "@/lib/queryClient";
 import type { Worker } from "@shared/schema";
 
@@ -20,6 +21,7 @@ export default function Workers() {
   const [showWorkerForm, setShowWorkerForm] = useState(false);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [showAdvanceForm, setShowAdvanceForm] = useState(false);
+  const [showWorkerDetails, setShowWorkerDetails] = useState(false);
 
   const { data: workers = [], isLoading } = useQuery({
     queryKey: ["/api/workers"],
@@ -91,6 +93,8 @@ export default function Workers() {
             <CreditCard className="mr-2 h-4 w-4" />
             Give Advance
           </Button>
+
+          {/* Trip creation removed as requested */}
           
           <Select value={filterType} onValueChange={setFilterType} data-testid="select-worker-type">
             <SelectTrigger className="w-48">
@@ -100,6 +104,7 @@ export default function Workers() {
               <SelectItem value="all">All Workers</SelectItem>
               <SelectItem value="rojdaar">Rojdaar (Daily Wage)</SelectItem>
               <SelectItem value="karagir">Karagir (Piece Rate)</SelectItem>
+              <SelectItem value="driver">Driver (Trip Based)</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -152,9 +157,16 @@ export default function Workers() {
                     <tr key={worker.id} data-testid={`row-worker-${worker.id}`}>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-medium">
+                          <button
+                            className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-medium"
+                            onClick={() => {
+                              setSelectedWorker(worker);
+                              setShowWorkerDetails(true);
+                            }}
+                            aria-label={`View ${worker.name}`}
+                          >
                             {worker.name.charAt(0).toUpperCase()}
-                          </div>
+                          </button>
                           <div className="ml-4">
                             <div className="text-sm font-medium text-gray-900" data-testid={`text-worker-name-${worker.id}`}>
                               {worker.name}
@@ -165,16 +177,18 @@ export default function Workers() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <Badge 
-                          className={worker.type === 'rojdaar' ? 'erp-badge-rojdaar' : 'erp-badge-karagir'}
+                          className={worker.type === 'rojdaar' ? 'erp-badge-rojdaar' : worker.type === 'karagir' ? 'erp-badge-karagir' : 'erp-badge-rojdaar'}
                           data-testid={`badge-type-${worker.id}`}
                         >
-                          {worker.type === 'rojdaar' ? 'Rojdaar' : 'Karagir'}
+                          {worker.type === 'rojdaar' ? 'Rojdaar' : worker.type === 'karagir' ? 'Karagir' : 'Driver'}
                         </Badge>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900" data-testid={`text-rate-${worker.id}`}>
                         {worker.type === 'rojdaar' 
                           ? `₹${worker.dailyWage}/day`
-                          : `₹${worker.pieceRate}/brick`
+                          : worker.type === 'karagir' 
+                            ? `₹${worker.pieceRate}/brick`
+                            : `Trip Based`
                         }
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900" data-testid={`text-phone-${worker.id}`}>
@@ -277,6 +291,23 @@ export default function Workers() {
                 setShowWorkerForm(false);
               }}
             />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Worker Details Dialog */}
+      <Dialog open={showWorkerDetails} onOpenChange={(open) => {
+        if (!open) {
+          setSelectedWorker(null);
+          setShowWorkerDetails(false);
+        }
+      }}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Worker Details - {selectedWorker?.name}</DialogTitle>
+          </DialogHeader>
+          {selectedWorker && (
+            <WorkerDetails worker={selectedWorker} />
           )}
         </DialogContent>
       </Dialog>

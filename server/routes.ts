@@ -8,7 +8,9 @@ import {
   insertSalesOrderSchema,
   insertInventoryMovementSchema,
   insertPaymentSchema,
-  insertAdvancePaymentSchema
+  insertAdvancePaymentSchema,
+  insertTripSchema,
+  insertTripParticipantSchema
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -204,7 +206,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/payments", async (req, res) => {
     try {
       const paymentData = insertPaymentSchema.parse(req.body);
-      const payment = await storage.createPayment(paymentData);
+      const applyAdvanceAmount = typeof req.body.applyAdvanceAmount === 'number' ? req.body.applyAdvanceAmount : undefined;
+      const payment = await storage.createPayment(paymentData, applyAdvanceAmount);
       res.json(payment);
     } catch (error) {
       res.status(400).json({ message: "Invalid payment data", error });
@@ -285,6 +288,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(advance);
     } catch (error) {
       res.status(400).json({ message: "Invalid advance payment data", error });
+    }
+  });
+
+  // Trips for drivers
+  app.get("/api/trips", async (req, res) => {
+    const { driverId, weekStart, weekEnd } = req.query;
+    const trips = await storage.getTrips(driverId as string | undefined, weekStart as string | undefined, weekEnd as string | undefined);
+    res.json(trips);
+  });
+
+  app.post("/api/trips", async (req, res) => {
+    try {
+      const tripData = insertTripSchema.parse(req.body);
+      // Participants provided separately as participantIds array
+      const participantIds: string[] = Array.isArray(req.body.participantIds) ? req.body.participantIds : [];
+      const result = await storage.createTripWithParticipants({ ...tripData, participantIds });
+      res.json(result);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid trip data", error });
+    }
+  });
+
+  // Notes
+  app.get("/api/notes", async (_req, res) => {
+    try {
+      const list = await storage.getNotes(50);
+      res.json(list);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch notes", error: error?.message || String(error) });
+    }
+  });
+
+  app.post("/api/notes", async (req, res) => {
+    try {
+      if (typeof req.body.content !== 'string' || req.body.content.trim() === '') {
+        return res.status(400).json({ message: "Invalid note content" });
+      }
+      const note = await storage.createNote({ content: req.body.content });
+      res.json(note);
+    } catch (error) {
+      res.status(400).json({ message: "Failed to create note", error });
+    }
+  });
+
+  app.delete("/api/notes/:id", async (req, res) => {
+    try {
+      await storage.deleteNote(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(400).json({ message: "Failed to delete note", error });
+    }
+  });
+
+  // Admin route: clear advances and reset balances (use carefully)
+  app.post("/api/admin/clear-advances", async (_req, res) => {
+    try {
+      // Hard reset: delete all advances and zero balances
+      await storage.clearAdvancesAndResetBalances();
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to clear advances", error });
     }
   });
 

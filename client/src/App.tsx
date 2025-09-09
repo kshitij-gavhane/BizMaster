@@ -12,6 +12,7 @@ import Sales from "@/pages/Sales";
 import Customers from "@/pages/Customers";
 import Inventory from "@/pages/Inventory";
 import Payments from "@/pages/Payments";
+import TransactionHistory from "@/pages/TransactionHistory";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -29,6 +30,7 @@ function Router() {
             <Route path="/customers" component={Customers} />
             <Route path="/inventory" component={Inventory} />
             <Route path="/payments" component={Payments} />
+            <Route path="/transactions" component={TransactionHistory} />
             <Route component={NotFound} />
           </Switch>
         </main>

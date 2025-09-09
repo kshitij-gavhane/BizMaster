@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -48,6 +48,10 @@ export function AdvancePaymentForm({ workers, selectedWorkerId, open, onOpenChan
     },
   });
 
+  useEffect(() => {
+    form.setValue("workerId", selectedWorkerId || "");
+  }, [selectedWorkerId, form]);
+
   const advancePaymentMutation = useMutation({
     mutationFn: async (data: AdvancePaymentFormData) => {
       const response = await fetch("/api/advance-payments", {
@@ -75,7 +79,7 @@ export function AdvancePaymentForm({ workers, selectedWorkerId, open, onOpenChan
     onError: (error) => {
       toast({
         title: "Error",
-        description: error.message,
+        description: (error as Error).message,
         variant: "destructive",
       });
     },
@@ -85,7 +89,7 @@ export function AdvancePaymentForm({ workers, selectedWorkerId, open, onOpenChan
     advancePaymentMutation.mutate(data);
   };
 
-  const selectedWorker = workers.find(w => w.id === form.watch("workerId"));
+  const selectedWorker = workers.find(w => w.id === (form.watch("workerId") || selectedWorkerId));
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -102,7 +106,7 @@ export function AdvancePaymentForm({ workers, selectedWorkerId, open, onOpenChan
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Worker</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value || selectedWorkerId || ""}>
                     <FormControl>
                       <SelectTrigger data-testid="select-worker">
                         <SelectValue placeholder="Select a worker" />

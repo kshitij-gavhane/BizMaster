@@ -6,7 +6,8 @@ import {
   ShoppingCart,
   UserCheck,
   Package,
-  CreditCard
+  CreditCard,
+  History
 } from "lucide-react";
 
 const navigationItems = [
@@ -17,6 +18,7 @@ const navigationItems = [
   { path: "/customers", label: "Customers", icon: UserCheck },
   { path: "/inventory", label: "Inventory", icon: Package },
   { path: "/payments", label: "Payments", icon: CreditCard },
+  { path: "/transactions", label: "Transaction History", icon: History },
 ];
 
 export default function Sidebar() {

@@ -30,6 +30,7 @@ interface PaymentFormProps {
 export default function PaymentForm({ worker, onSuccess, onCancel }: PaymentFormProps) {
   const { toast } = useToast();
   const [isPartialPayment, setIsPartialPayment] = useState(false);
+  const [availableAdvance, setAvailableAdvance] = useState(0);
 
   // Calculate current week dates
   const now = new Date();
@@ -66,8 +67,24 @@ export default function PaymentForm({ worker, onSuccess, onCancel }: PaymentForm
     },
   });
 
+  // Fetch total available advance for the worker
+  useEffect(() => {
+    async function fetchAdvance() {
+      try {
+        const res = await fetch(`/api/advance-payments?workerId=${worker.id}`);
+        if (!res.ok) return;
+        const advances = await res.json();
+        const totalRemaining = advances
+          .map((a: any) => Math.max(0, Number(a.amount) - Number(a.adjustedAmount || 0)))
+          .reduce((s: number, v: number) => s + v, 0);
+        setAvailableAdvance(totalRemaining);
+      } catch {}
+    }
+    fetchAdvance();
+  }, [worker.id]);
+
   const processPaymentMutation = useMutation({
-    mutationFn: async (data: InsertPayment) => {
+    mutationFn: async (data: InsertPayment & { applyAdvanceAmount?: number }) => {
       const response = await apiRequest("POST", "/api/payments", data);
       return response.json();
     },
@@ -117,11 +134,40 @@ export default function PaymentForm({ worker, onSuccess, onCancel }: PaymentForm
   // Update balance when paid amount changes
   const paidAmount = form.watch("paidAmount");
   const grossAmount = form.watch("grossAmount");
+  const [advanceApplied, setAdvanceApplied] = useState(0);
+  const [manualAdvanceCut, setManualAdvanceCut] = useState<number | null>(null);
 
   useEffect(() => {
-    const balance = Number(grossAmount) - Number(paidAmount);
-    form.setValue("balanceAmount", balance.toFixed(2));
-  }, [paidAmount, grossAmount, form]);
+    let balance = Number(grossAmount) - Number(paidAmount);
+    async function applyAdvances() {
+      try {
+        const desiredCut = manualAdvanceCut ?? Math.max(0, balance);
+        const use = Math.min(availableAdvance, desiredCut);
+        setAdvanceApplied(use);
+        balance = balance - use;
+      } catch {}
+      form.setValue("balanceAmount", balance.toFixed(2));
+    }
+    applyAdvances();
+  }, [paidAmount, grossAmount, form, worker.id, manualAdvanceCut, availableAdvance]);
+
+  // For non-partial payments, auto-apply advances to reduce payable amount by default
+  useEffect(() => {
+    if (isPartialPayment) return;
+    async function autoApplyForFullPayment() {
+      try {
+        const gross = Number(form.getValues("grossAmount"));
+        const desiredCut = manualAdvanceCut ?? gross;
+        const use = Math.min(availableAdvance, desiredCut);
+        setAdvanceApplied(use);
+        const pay = Math.max(0, gross - use);
+        form.setValue("paidAmount", pay.toFixed(2));
+        form.setValue("balanceAmount", "0");
+      } catch {}
+    }
+    autoApplyForFullPayment();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPartialPayment, worker.id, form.watch("grossAmount"), manualAdvanceCut, availableAdvance]);
 
   const onSubmit = (data: PaymentFormData) => {
     const paymentData: InsertPayment = {
@@ -136,7 +182,11 @@ export default function PaymentForm({ worker, onSuccess, onCancel }: PaymentForm
       notes: data.notes || null,
     };
 
-    processPaymentMutation.mutate(paymentData);
+    const applyAdvanceAmount = isPartialPayment
+      ? (manualAdvanceCut ?? 0)
+      : advanceApplied;
+
+    processPaymentMutation.mutate({ ...paymentData, applyAdvanceAmount });
   };
 
   const weekRange = `${new Date(weekStartDate).toLocaleDateString()} - ${new Date(weekEndDate).toLocaleDateString()}`;
@@ -193,6 +243,16 @@ export default function PaymentForm({ worker, onSuccess, onCancel }: PaymentForm
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
+                <Label className="text-sm font-medium text-gray-700">Advance Available</Label>
+                <div className="text-lg font-semibold text-gray-900">₹{availableAdvance.toFixed(2)}</div>
+              </div>
+              <div>
+                <Label className="text-sm font-medium text-gray-700">Advance Used This Payment</Label>
+                <div className="text-lg font-semibold text-gray-900">₹{advanceApplied.toFixed(2)}</div>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
                 <Label className="text-sm font-medium text-gray-700">Days Worked</Label>
                 <div className="text-lg font-semibold text-gray-900" data-testid="text-days-worked">
                   {form.watch("daysWorked")}
@@ -202,7 +262,7 @@ export default function PaymentForm({ worker, onSuccess, onCancel }: PaymentForm
                 <div>
                   <Label className="text-sm font-medium text-gray-700">Bricks Produced</Label>
                   <div className="text-lg font-semibold text-gray-900" data-testid="text-bricks-produced">
-                    {form.watch("bricksProduced").toLocaleString()}
+                    {Number(form.watch("bricksProduced") || 0).toLocaleString()}
                   </div>
                 </div>
               )}
@@ -264,6 +324,27 @@ export default function PaymentForm({ worker, onSuccess, onCancel }: PaymentForm
               }`} data-testid="text-balance-amount">
                 ₹{Number(form.watch("balanceAmount")).toLocaleString()}
               </div>
+              {advanceApplied > 0 && (
+                <div className="text-sm text-gray-500">Auto-applied advance: ₹{advanceApplied.toFixed(2)}</div>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="advance-cut" className="text-sm font-medium text-gray-700">Cut Advance (₹)</Label>
+              <Input
+                id="advance-cut"
+                type="number"
+                step="0.01"
+                min="0"
+                value={manualAdvanceCut ?? ''}
+                onChange={(e) => {
+                  const val = e.target.value === '' ? null : Number(e.target.value);
+                  if (val === null) return setManualAdvanceCut(null);
+                  setManualAdvanceCut(Math.max(0, Math.min(val, availableAdvance)));
+                }}
+                placeholder="Enter amount to adjust from advance"
+              />
+              <p className="text-xs text-gray-500 mt-1">Leave empty to auto-use up to balance. Remaining after cut: ₹{(availableAdvance - advanceApplied).toFixed(2)}</p>
             </div>
 
             <div>

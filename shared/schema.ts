@@ -6,7 +6,7 @@ import { z } from "zod";
 export const workers = pgTable("workers", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
-  type: text("type").notNull(), // 'rojdaar' or 'karagir'
+  type: text("type").notNull(), // 'rojdaar' | 'karagir' | 'driver'
   dailyWage: decimal("daily_wage", { precision: 10, scale: 2 }), // for rojdaar workers
   pieceRate: decimal("piece_rate", { precision: 10, scale: 4 }), // for karagir workers (per brick)
   phone: text("phone"),
@@ -47,7 +47,9 @@ export const salesOrders = pgTable("sales_orders", {
   vehicleType: text("vehicle_type").notNull(), // 'truck' or 'tractor'
   vehicleNumber: text("vehicle_number").notNull(),
   driverName: text("driver_name").notNull(),
-  status: text("status").notNull().default("pending"), // 'pending', 'delivered', 'invoiced'
+  ownFleet: boolean("own_fleet").default(false),
+  driverWorkerId: varchar("driver_worker_id").references(() => workers.id),
+  status: text("status").notNull().default("pending"), // 'pending', 'delivered', 'invoiced', 'cancelled'
   orderDate: date("order_date").notNull(),
   deliveryDate: date("delivery_date"),
   notes: text("notes"),
@@ -102,6 +104,32 @@ export const advancePayments = pgTable("advance_payments", {
   reason: text("reason"),
   paymentDate: timestamp("payment_date").default(sql`now()`),
   notes: text("notes"),
+  // Amount of this advance that has been adjusted against wages so far
+  adjustedAmount: decimal("adjusted_amount", { precision: 10, scale: 2 }).default("0"),
+});
+
+// Quick notes (short bullet notes)
+export const notes = pgTable("notes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+// Trips for drivers. Each trip has a driver, vehicle type and per-trip amount.
+export const trips = pgTable("trips", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  driverId: varchar("driver_id").notNull().references(() => workers.id),
+  tripDate: date("trip_date").notNull(),
+  vehicleType: text("vehicle_type").notNull(), // 'truck' | 'tractor'
+  amountPerTrip: decimal("amount_per_trip", { precision: 10, scale: 2 }).notNull(),
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+// Trip participants; workers who participated on a trip (including or excluding driver as needed)
+export const tripParticipants = pgTable("trip_participants", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tripId: varchar("trip_id").notNull().references(() => trips.id),
+  workerId: varchar("worker_id").notNull().references(() => workers.id),
 });
 
 // Insert schemas
@@ -148,6 +176,20 @@ export const insertAdvancePaymentSchema = createInsertSchema(advancePayments).om
   paymentDate: true,
 });
 
+export const insertNoteSchema = createInsertSchema(notes).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertTripSchema = createInsertSchema(trips).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertTripParticipantSchema = createInsertSchema(tripParticipants).omit({
+  id: true,
+});
+
 // Types
 export type Worker = typeof workers.$inferSelect;
 export type InsertWorker = z.infer<typeof insertWorkerSchema>;
@@ -174,3 +216,12 @@ export type InsertWeeklySummary = z.infer<typeof insertWeeklySummarySchema>;
 
 export type AdvancePayment = typeof advancePayments.$inferSelect;
 export type InsertAdvancePayment = z.infer<typeof insertAdvancePaymentSchema>;
+
+export type Trip = typeof trips.$inferSelect;
+export type InsertTrip = z.infer<typeof insertTripSchema>;
+
+export type TripParticipant = typeof tripParticipants.$inferSelect;
+export type InsertTripParticipant = z.infer<typeof insertTripParticipantSchema>;
+
+export type Note = typeof notes.$inferSelect;
+export type InsertNote = z.infer<typeof insertNoteSchema>;

@@ -1,0 +1,16 @@
+node_modules
+dist
+.git
+.gitignore
+**/.DS_Store
+client/node_modules
+client/dist
+ios
+macos
+build
+.idea
+.local
+.metadata
+.dart_tool
+.vscode
+

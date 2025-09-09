@@ -39,6 +39,8 @@ export default function SalesOrderForm({ customers, onSuccess, onCancel }: Sales
       vehicleType: "",
       vehicleNumber: "",
       driverName: "",
+      ownFleet: false as any,
+      driverWorkerId: undefined as any,
       orderDate: new Date().toISOString().split('T')[0],
       notes: "",
     },
@@ -93,6 +95,8 @@ export default function SalesOrderForm({ customers, onSuccess, onCancel }: Sales
       vehicleType: data.vehicleType,
       vehicleNumber: data.vehicleNumber,
       driverName: data.driverName,
+      ownFleet: (data as any).ownFleet ?? false,
+      driverWorkerId: (data as any).driverWorkerId || null,
       orderDate: data.orderDate,
       notes: data.notes || null,
     };
@@ -263,6 +267,28 @@ export default function SalesOrderForm({ customers, onSuccess, onCancel }: Sales
             </FormItem>
           )}
         />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="flex items-center space-x-2">
+            <input type="checkbox" id="own-fleet" {...form.register("ownFleet" as any)} />
+            <label htmlFor="own-fleet" className="text-sm">Delivered by own fleet</label>
+          </div>
+          {(form.watch("ownFleet" as any) as unknown as boolean) && (
+            <FormField
+              control={form.control}
+              name={"driverWorkerId" as any}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Driver (optional)</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="Enter driver worker ID (optional)" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+        </div>
 
         <FormField
           control={form.control}

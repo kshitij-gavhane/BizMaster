@@ -5,9 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { CreditCard, Clock, CheckCircle, AlertTriangle } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import PaymentForm from "@/components/forms/PaymentForm";
+import type { Worker } from "@shared/schema";
 
 export default function Payments() {
   const [periodFilter, setPeriodFilter] = useState("this-week");
+  const [showPaymentForm, setShowPaymentForm] = useState(false);
+  const [selectedWorker, setSelectedWorker] = useState<Worker | null>(null);
+  const [paymentType, setPaymentType] = useState<"full" | "partial">("full");
 
   const { data: payments = [], isLoading: paymentsLoading } = useQuery({
     queryKey: ["/api/payments"],
@@ -71,7 +77,15 @@ export default function Payments() {
       {/* Header Actions */}
       <div className="flex justify-between items-center">
         <div className="flex space-x-4">
-          <Button className="bg-blue-600 text-white hover:bg-blue-700" data-testid="button-process-payments">
+          <Button 
+            className="bg-blue-600 text-white hover:bg-blue-700" 
+            data-testid="button-process-payments"
+            onClick={() => {
+              setShowPaymentForm(true);
+              setSelectedWorker(null);
+              setPaymentType("full");
+            }}
+          >
             <CreditCard className="mr-2 h-4 w-4" />
             Process Payments
           </Button>
@@ -217,6 +231,14 @@ export default function Payments() {
                           size="sm"
                           className="bg-green-600 text-white hover:bg-green-700"
                           data-testid={`button-pay-full-${index}`}
+                          onClick={() => {
+                            const worker = workers.find((w: any) => w.id === calc.workerId);
+                            if (worker) {
+                              setSelectedWorker(worker);
+                              setPaymentType("full");
+                              setShowPaymentForm(true);
+                            }
+                          }}
                         >
                           Pay Full
                         </Button>
@@ -225,6 +247,14 @@ export default function Payments() {
                           size="sm"
                           className="text-blue-600 hover:text-blue-700"
                           data-testid={`button-partial-${index}`}
+                          onClick={() => {
+                            const worker = workers.find((w: any) => w.id === calc.workerId);
+                            if (worker) {
+                              setSelectedWorker(worker);
+                              setPaymentType("partial");
+                              setShowPaymentForm(true);
+                            }
+                          }}
                         >
                           Partial
                         </Button>
@@ -243,6 +273,39 @@ export default function Payments() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Payment Form Dialog */}
+      <Dialog open={showPaymentForm} onOpenChange={setShowPaymentForm}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {selectedWorker 
+                ? `${paymentType === 'full' ? 'Pay Full' : 'Partial Payment'} - ${selectedWorker.name}`
+                : 'Process Payment'
+              }
+            </DialogTitle>
+          </DialogHeader>
+          {selectedWorker ? (
+            <PaymentForm 
+              worker={selectedWorker}
+              onSuccess={() => {
+                setShowPaymentForm(false);
+                setSelectedWorker(null);
+                // Refresh the data
+                window.location.reload();
+              }}
+              onCancel={() => {
+                setShowPaymentForm(false);
+                setSelectedWorker(null);
+              }}
+            />
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-gray-500">Please select a worker from the payment schedule to process payment.</p>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
