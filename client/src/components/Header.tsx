@@ -1,6 +1,8 @@
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Menu } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import Sidebar from "@/components/Sidebar";
 
 const pageTitles: Record<string, string> = {
   "/": "Dashboard",
@@ -27,10 +29,24 @@ export default function Header({ onNewEntry }: HeaderProps) {
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30">
-      <div className="px-4 md:px-6 py-3 md:py-4 flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-center">
-        <h2 className="text-xl md:text-2xl font-semibold text-gray-800" data-testid="page-title">
-          {title}
-        </h2>
+      <div className="px-4 md:px-6 py-3 md:py-4 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <div className="md:hidden">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="icon" aria-label="Open menu">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="p-0 w-72">
+                <Sidebar />
+              </SheetContent>
+            </Sheet>
+          </div>
+          <h2 className="text-xl md:text-2xl font-semibold text-gray-800" data-testid="page-title">
+            {title}
+          </h2>
+        </div>
         <div className="flex items-center gap-3 md:space-x-4">
           <span className="text-sm text-gray-500" data-testid="current-date">
             Today: {currentDate}
