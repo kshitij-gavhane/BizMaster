@@ -39,7 +39,7 @@ export default function Header({ onNewEntry }: HeaderProps) {
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="p-0 w-72">
-                <Sidebar />
+                <Sidebar variant="drawer" />
               </SheetContent>
             </Sheet>
           </div>
