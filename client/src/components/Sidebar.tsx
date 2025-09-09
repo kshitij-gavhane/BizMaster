@@ -25,21 +25,21 @@ export default function Sidebar() {
   const [location] = useLocation();
 
   return (
-    <div className="w-64 bg-white shadow-lg">
-      <div className="p-6 border-b border-gray-200">
+    <div className="w-64 bg-white shadow-lg hidden md:block">
+      <div className="p-4 md:p-6 border-b border-gray-200">
         <h1 className="text-xl font-bold text-gray-800" data-testid="app-title">HIM Bricks</h1>
         <p className="text-sm text-gray-500">Manufacturing Management</p>
       </div>
       
       <nav className="mt-6">
-        <div className="px-4 space-y-2">
+        <div className="px-2 md:px-4 space-y-2">
           {navigationItems.map(({ path, label, icon: Icon }) => {
             const isActive = location === path;
             return (
               <Link
                 key={path}
                 href={path}
-                className={`flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
+                className={`flex items-center px-3 py-3 md:px-4 text-sm font-medium rounded-lg transition-colors ${
                   isActive
                     ? "text-blue-600 bg-blue-50"
                     : "text-gray-600 hover:bg-gray-100"

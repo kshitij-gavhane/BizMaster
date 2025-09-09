@@ -53,13 +53,13 @@ export default function Attendance() {
   return (
     <div className="space-y-6">
       {/* Header Actions */}
-      <div className="flex justify-between items-center">
-        <div className="flex items-center space-x-4">
+      <div className="flex flex-col gap-3 md:flex-row md:justify-between md:items-center">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
           <Input
             type="date"
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
-            className="w-48"
+            className="w-full sm:w-48"
             data-testid="input-attendance-date"
           />
           <Dialog open={showAttendanceForm} onOpenChange={setShowAttendanceForm}>
@@ -69,7 +69,7 @@ export default function Attendance() {
                 Mark Attendance
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            <DialogContent className="w-[95vw] sm:max-w-4xl max-h-[80vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Mark Attendance - {new Date(selectedDate).toLocaleDateString()}</DialogTitle>
               </DialogHeader>
@@ -94,7 +94,7 @@ export default function Attendance() {
           <Card className="bg-white">
             <CardContent className="p-6">
               <h3 className="text-lg font-semibold text-gray-800 mb-4">Today's Attendance</h3>
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {workers.length > 0 ? (
                   workers.map((worker: Worker) => {
                     const workerAttendance = attendanceMap.get(worker.id);
@@ -103,7 +103,7 @@ export default function Attendance() {
                     return (
                       <div 
                         key={worker.id} 
-                        className="flex items-center justify-between p-4 border border-gray-200 rounded-lg"
+                        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 border border-gray-200 rounded-lg"
                         data-testid={`attendance-row-${worker.id}`}
                       >
                         <div className="flex items-center">

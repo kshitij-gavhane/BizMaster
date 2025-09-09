@@ -75,8 +75,8 @@ export default function Payments() {
   return (
     <div className="space-y-6">
       {/* Header Actions */}
-      <div className="flex justify-between items-center">
-        <div className="flex space-x-4">
+      <div className="flex flex-col gap-3 md:flex-row md:justify-between md:items-center">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
           <Button 
             className="bg-blue-600 text-white hover:bg-blue-700" 
             data-testid="button-process-payments"
@@ -90,7 +90,7 @@ export default function Payments() {
             Process Payments
           </Button>
           <Select value={periodFilter} onValueChange={setPeriodFilter} data-testid="select-payment-period">
-            <SelectTrigger className="w-48">
+            <SelectTrigger className="w-full sm:w-48">
               <SelectValue placeholder="Select period" />
             </SelectTrigger>
             <SelectContent>
@@ -166,7 +166,7 @@ export default function Payments() {
         <CardContent className="p-6">
           <h3 className="text-lg font-semibold text-gray-800 mb-4">Payment Schedule</h3>
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full min-w-[720px]">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -276,7 +276,7 @@ export default function Payments() {
 
       {/* Payment Form Dialog */}
       <Dialog open={showPaymentForm} onOpenChange={setShowPaymentForm}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="w-[95vw] sm:max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {selectedWorker 

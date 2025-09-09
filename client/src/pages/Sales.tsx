@@ -93,7 +93,7 @@ export default function Sales() {
   return (
     <div className="space-y-6">
       {/* Header Actions */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <Dialog open={showOrderForm} onOpenChange={setShowOrderForm}>
           <DialogTrigger asChild>
             <Button className="bg-blue-600 text-white hover:bg-blue-700" data-testid="button-new-sales-order">
@@ -101,7 +101,7 @@ export default function Sales() {
               New Sales Order
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="w-[95vw] sm:max-w-2xl">
             <DialogHeader>
               <DialogTitle>Create New Sales Order</DialogTitle>
             </DialogHeader>
@@ -113,9 +113,9 @@ export default function Sales() {
           </DialogContent>
         </Dialog>
         
-        <div className="flex items-center space-x-2">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full md:w-auto">
           <Select value={statusFilter} onValueChange={setStatusFilter} data-testid="select-status-filter">
-            <SelectTrigger className="w-48">
+            <SelectTrigger className="w-full sm:w-48">
               <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
             <SelectContent>
@@ -131,7 +131,7 @@ export default function Sales() {
             placeholder="Search orders..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-64"
+            className="w-full sm:w-64"
             data-testid="input-search-orders"
           />
           <Button variant="outline" size="icon" data-testid="button-search">
@@ -144,7 +144,7 @@ export default function Sales() {
       <Card className="bg-white">
         <CardContent className="p-0">
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full min-w-[720px]">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -286,7 +286,7 @@ export default function Sales() {
 
       {/* View Order Dialog */}
       <Dialog open={showViewDialog} onOpenChange={setShowViewDialog}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="w-[95vw] sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle>View Sales Order</DialogTitle>
           </DialogHeader>
@@ -360,7 +360,7 @@ export default function Sales() {
 
       {/* Invoice Dialog */}
       <Dialog open={showInvoiceDialog} onOpenChange={setShowInvoiceDialog}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="w-[95vw] sm:max-w-4xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Generate Invoice</DialogTitle>
           </DialogHeader>
