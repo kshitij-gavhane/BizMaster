@@ -101,7 +101,7 @@ export default function Sales() {
               New Sales Order
             </Button>
           </DialogTrigger>
-          <DialogContent className="w-[95vw] sm:max-w-2xl">
+          <DialogContent className="w-[96vw] sm:max-w-[680px] max-h-[85vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Create New Sales Order</DialogTitle>
             </DialogHeader>

@@ -26,6 +26,15 @@ export default function Dashboard() {
   // Fetch sales orders to build weekly sales chart
   const { data: salesOrders = [] } = useQuery({
     queryKey: ["/api/sales-orders"],
+    queryFn: async () => {
+      try {
+        const res = await fetch("/api/sales-orders", { credentials: "include" });
+        if (!res.ok) return [];
+        return res.json();
+      } catch {
+        return [];
+      }
+    },
   });
 
   if (isLoading) {
@@ -181,6 +190,7 @@ export default function Dashboard() {
                 <XAxis dataKey="date" tickLine={false} axisLine={false} />
                 <YAxis tickLine={false} axisLine={false} />
                 <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+                <ChartLegend content={<ChartLegendContent nameKey="sales" />} />
                 <Area
                   type="monotone"
                   dataKey="sales"
@@ -192,7 +202,6 @@ export default function Dashboard() {
                 />
               </AreaChart>
             </ChartContainer>
-            <ChartLegend content={<ChartLegendContent nameKey="sales" />} />
           </CardContent>
         </Card>
 

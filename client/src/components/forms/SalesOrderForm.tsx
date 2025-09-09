@@ -156,7 +156,7 @@ export default function SalesOrderForm({ customers, onSuccess, onCancel }: Sales
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           <FormField
             control={form.control}
             name="quantity"
@@ -208,7 +208,7 @@ export default function SalesOrderForm({ customers, onSuccess, onCancel }: Sales
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="vehicleType"
