@@ -9,10 +9,23 @@ import {
   AlertTriangle 
 } from "lucide-react";
 import NotesWidget from "@/components/ui/notes-widget";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
+} from "@/components/ui/chart";
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
 export default function Dashboard() {
   const { data: metrics, isLoading } = useQuery({
     queryKey: ["/api/dashboard/metrics"],
+  });
+
+  // Fetch sales orders to build weekly sales chart
+  const { data: salesOrders = [] } = useQuery({
+    queryKey: ["/api/sales-orders"],
   });
 
   if (isLoading) {
@@ -34,6 +47,36 @@ export default function Dashboard() {
   const attendanceRate = metrics?.todayAttendance 
     ? ((metrics.todayAttendance.present / metrics.todayAttendance.total) * 100).toFixed(1)
     : "0";
+
+  // Build last 7 days labels
+  const days = Array.from({ length: 7 }).map((_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - (6 - i));
+    const key = d.toISOString().split('T')[0];
+    return { key, label: d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) };
+  });
+
+  // Aggregate sales (quantity) per day
+  const salesByDate: Record<string, number> = {};
+  for (const { key } of days) salesByDate[key] = 0;
+  salesOrders.forEach((o: any) => {
+    const date = o.orderDate;
+    if (date && salesByDate[date] !== undefined) {
+      salesByDate[date] += Number(o.quantity || 0);
+    }
+  });
+
+  const chartData = days.map(({ key, label }) => ({
+    date: label,
+    sales: salesByDate[key] || 0,
+  }));
+
+  const chartConfig = {
+    sales: {
+      label: "Bricks Sold",
+      color: "hsl(221.2 83.2% 53.3%)",
+    },
+  } as const;
 
   return (
     <div className="space-y-6">
@@ -128,13 +171,28 @@ export default function Dashboard() {
 
       {/* Charts and Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Production Chart Placeholder */}
-        <Card className="bg-white lg:col-span-2" data-testid="card-production-chart">
+        {/* Weekly Sales Chart */}
+        <Card className="bg-white lg:col-span-2" data-testid="card-weekly-sales-chart">
           <CardContent className="p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Weekly Production Trend</h3>
-            <div className="h-64 bg-gray-100 rounded-lg flex items-center justify-center">
-              <p className="text-gray-500">Production Chart Coming Soon</p>
-            </div>
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">Weekly Sales</h3>
+            <ChartContainer config={chartConfig} className="w-full h-64">
+              <AreaChart data={chartData} margin={{ left: 12, right: 12 }}>
+                <CartesianGrid vertical={false} strokeDasharray="3 3" />
+                <XAxis dataKey="date" tickLine={false} axisLine={false} />
+                <YAxis tickLine={false} axisLine={false} />
+                <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+                <Area
+                  type="monotone"
+                  dataKey="sales"
+                  stroke="var(--color-sales)"
+                  fill="var(--color-sales)"
+                  fillOpacity={0.2}
+                  strokeWidth={2}
+                  dot={{ r: 2 }}
+                />
+              </AreaChart>
+            </ChartContainer>
+            <ChartLegend content={<ChartLegendContent nameKey="sales" />} />
           </CardContent>
         </Card>
 
